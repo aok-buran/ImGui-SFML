@@ -29,6 +29,15 @@ struct Point {
     // конструктор
     Point(const sf::Vector2<int> &pos, int setNum) : pos(pos), setNum(setNum) {
     }
+
+    // получить случайную точку
+    static Point randomPoint() {
+        return Point(sf::Vector2<int>(
+                             rand() % WINDOW_SIZE_X,
+                             rand() % WINDOW_SIZE_Y),
+                     rand() % 2
+        );
+    }
 };
 
 // динамический список точек
@@ -42,12 +51,26 @@ float color[3] = {0.12f, 0.12f, 0.13f};
 // буфер, хранящий координаты последней добавленной вершины
 int lastAddPosBuf[2] = {0, 0};
 
+// буфер кол-ва случайных точек
+int lastRandoCntBuf[1] = {10};
+
+
+
 // задать цвет фона по вещественному массиву компонент
 static void setColor(float *pDouble) {
     bgColor.r = static_cast<sf::Uint8>(pDouble[0] * 255.f);
     bgColor.g = static_cast<sf::Uint8>(pDouble[1] * 255.f);
     bgColor.b = static_cast<sf::Uint8>(pDouble[2] * 255.f);
 }
+
+
+// добавить заданное кол-во случайных точек
+void randomize(int cnt) {
+    for (int i = 0; i < cnt; i++) {
+        points.emplace_back(Point::randomPoint());
+    }
+}
+
 
 // рисование параметров цвета
 void ShowBackgroundSetting() {
@@ -127,6 +150,32 @@ void ShowAddElem() {
     ImGui::PopID();
 }
 
+// панель добавления случайных точек
+void ShowRandomize() {
+    if (!ImGui::CollapsingHeader("Randomize"))
+        return;
+
+    // первый элемент в строке
+    ImGui::PushID(0);
+
+    // Инструмент выбора кол-ва
+    if (ImGui::DragInt("Count", lastRandoCntBuf, 0.1, 0, 100)) {
+
+    }
+    // восстанавливаем буффер id
+    ImGui::PopID();
+    // следующий элемент будет на той же строчке
+    ImGui::SameLine();
+    // второй элемент
+    ImGui::PushID(1);
+    // создаём кнопку добавления
+    if (ImGui::Button("Add"))
+        // по клику добавляем заданное число случайных точек
+        randomize(lastRandoCntBuf[0]);
+    ImGui::PopID();
+}
+
+
 // главный метод
 int main() {
     // создаём окно для рисования
@@ -187,6 +236,8 @@ int main() {
         ShowBackgroundSetting();
         // ручное добавление элементов
         ShowAddElem();
+        // добавление случайных точек
+        ShowRandomize();
 
         // конец рисования окна
         ImGui::End();
