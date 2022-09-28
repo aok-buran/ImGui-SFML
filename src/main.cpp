@@ -39,6 +39,9 @@ static sf::Color bgColor;
 // значение цвета по умолчанию
 float color[3] = {0.12f, 0.12f, 0.13f};
 
+// буфер, хранящий координаты последней добавленной вершины
+int lastAddPosBuf[2] = {0, 0};
+
 // задать цвет фона по вещественному массиву компонент
 static void setColor(float *pDouble) {
     bgColor.r = static_cast<sf::Uint8>(pDouble[0] * 255.f);
@@ -48,15 +51,18 @@ static void setColor(float *pDouble) {
 
 // рисование параметров цвета
 void ShowBackgroundSetting() {
+    // если не раскрыта панель `Background`
+    if (!ImGui::CollapsingHeader("Background"))
+        // заканчиваем выполнение
+        return;
+
     // Инструмент выбора цвета
     if (ImGui::ColorEdit3("Background color", color)) {
         // код вызывается при изменении значения
         // задаём цвет фона
         setColor(color);
     }
-    // конец рисование окна
 }
-
 
 // рисование задачи на невидимом окне во всё окно приложения
 void RenderTask() {
@@ -85,6 +91,42 @@ void RenderTask() {
     ImGui::End();
 }
 
+// ручное добавление элементов
+void ShowAddElem() {
+    // если не раскрыта панель `Add Elem`
+    if (!ImGui::CollapsingHeader("Add Elem"))
+        // заканчиваем выполнение
+        return;
+
+
+    // Инструмент выбора цвета
+    if (ImGui::DragInt2("Coords", lastAddPosBuf, 0.5f, 0, std::min(WINDOW_SIZE_X, WINDOW_SIZE_Y))) {
+        // никаких действий не требуется, достаточно
+        // тех изменений буфера, которые imGui выполняет
+        // автоматически
+    }
+
+    // фиксируем id равный 0 для первого элемента
+    ImGui::PushID(0);
+    // если нажата кнопка `Set 1`
+    if (ImGui::Button("Set 1"))
+        // добавляем то добавляем в список точку, принадлежащую первому множеству
+        points.emplace_back(Point(sf::Vector2<int>(lastAddPosBuf[0], lastAddPosBuf[1]), SET_1));
+    // восстанавливаем буфер id
+    ImGui::PopID();
+
+    // говорим imGui, что следующий элемент нужно рисовать на той же линии
+    ImGui::SameLine();
+    // задаём id, равный одному
+    ImGui::PushID(1);
+    // если нажата кнопка `Set 2`
+    if (ImGui::Button("Set 2"))
+        // добавляем то добавляем в список точку, принадлежащую второму множеству
+        points.emplace_back(Point(sf::Vector2<int>(lastAddPosBuf[0], lastAddPosBuf[1]), SET_2));
+    // восстанавливаем буфер id
+    ImGui::PopID();
+}
+
 // главный метод
 int main() {
     // создаём окно для рисования
@@ -96,11 +138,6 @@ int main() {
 
     // задаём цвет фона
     setColor(color);
-
-    points.push_back(Point(sf::Vector2<int>(100, 600), SET_1));
-    points.push_back(Point(sf::Vector2<int>(100, 700), SET_1));
-    points.push_back(Point(sf::Vector2<int>(200, 500), SET_2));
-    points.push_back(Point(sf::Vector2<int>(200, 700), SET_2));
 
     // переменная таймера
     sf::Clock deltaClock;
@@ -122,6 +159,9 @@ int main() {
             if (event.type == sf::Event::MouseButtonPressed) {
                 // если мышь не обрабатывается элементами imGui
                 if (!ImGui::GetIO().WantCaptureMouse) {
+                    // меняем координаты последней добавленной точки
+                    lastAddPosBuf[0] = event.mouseButton.x;
+                    lastAddPosBuf[1] = event.mouseButton.y;
                     // если левая кнопка мыши
                     if (event.mouseButton.button == sf::Mouse::Button::Left)
                         points.emplace_back(sf::Vector2<int>(event.mouseButton.x, event.mouseButton.y), SET_1);
@@ -138,13 +178,15 @@ int main() {
         RenderTask();
 
         // делаем окно полупрозрачным
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.12f, 0.12f, 0.13f, 0.8f)); // Set window background to red
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.12f, 0.12f, 0.13f, 0.8f));
 
         // создаём окно управления
         ImGui::Begin("Control");
 
         // рисование параметров цвета
         ShowBackgroundSetting();
+        // ручное добавление элементов
+        ShowAddElem();
 
         // конец рисования окна
         ImGui::End();
