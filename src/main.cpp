@@ -13,8 +13,14 @@ const int WINDOW_SIZE_Y = 800;
 const char OUTPUT_PATH[255] = "D:/Programming/Files/out.txt";
 const char INPUT_PATH[255] = "D:/Programming/Files/in.txt";
 
-const int SET_1 = 0;
-const int SET_2 = 1;
+// первое множество
+static const int SET_1 = 0;
+// второе множество
+static const int SET_2 = 1;
+// пересечение множеств
+static const int SET_CROSSED = 2;
+// разность множеств
+static const int SET_SINGLE = 3;
 
 struct Point {
     sf::Vector2<int> pos;
@@ -38,6 +44,7 @@ float color[3] = {0.12f, 0.12f, 0.13f};
 
 
 std::vector<Point> points;
+
 std::vector<Point> resPoints;
 
 int lastAddPosBuf[2] = {0, 0};
@@ -59,10 +66,11 @@ void solve() {
 
 }
 
+// рисование задачи на невидимом окне во всё окно приложения
 void RenderTask() {
-
-
+    // задаём левый верхний край невидимого окна
     ImGui::SetNextWindowPos(ImVec2(0, 0));
+    // задаём правый нижний край невидимого окна
     ImGui::SetNextWindowSize(ImVec2(WINDOW_SIZE_X, WINDOW_SIZE_Y));
 
     ImGui::Begin("Overlay", nullptr,
@@ -281,7 +289,7 @@ int main() {
 
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.12f, 0.12f, 0.13f, 0.8f)); // Set window background to red
 
-        ImGui::Begin("Sample window"); // создаём окно
+        ImGui::Begin("Control"); // создаём окно
 
         ShowBackgroundSetting();
         ShowAddElem();
