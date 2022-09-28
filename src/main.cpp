@@ -4,6 +4,7 @@
 
 #include <imgui-SFML.h>
 #include <imgui.h>
+#include <fstream>
 
 // первое множество
 static const int SET_1 = 0;
@@ -18,6 +19,11 @@ static const int SET_SINGLE = 3;
 static const int WINDOW_SIZE_X = 800;
 // Высота окна
 static const int WINDOW_SIZE_Y = 800;
+
+// путь к файлу вывода
+static const char OUTPUT_PATH[255] = "D:/Programming/Files/out.txt";
+// путь к файлу ввода
+static const char INPUT_PATH[255] = "D:/Programming/Files/in.txt";
 
 // Точка
 struct Point {
@@ -55,7 +61,6 @@ int lastAddPosBuf[2] = {0, 0};
 int lastRandoCntBuf[1] = {10};
 
 
-
 // задать цвет фона по вещественному массиву компонент
 static void setColor(float *pDouble) {
     bgColor.r = static_cast<sf::Uint8>(pDouble[0] * 255.f);
@@ -71,6 +76,39 @@ void randomize(int cnt) {
     }
 }
 
+// запись в файл
+void saveToFile() {
+    // открываем поток данных для записи в файл
+    std::ofstream output(OUTPUT_PATH);
+
+    // перебираем точки
+    for (auto point: points) {
+        // выводим через пробел построчно: x-координату, y-координату и номер множества
+        output << point.pos.x << " " << point.pos.y << " " << point.setNum << std::endl;
+    }
+
+    // закрываем
+    output.close();
+}
+
+// загрузка из файла
+void loadFromFile() {
+    // открываем поток данных для чтения из файла
+    std::ifstream input(INPUT_PATH);
+    // очищаем массив точек
+    points.clear();
+    // пока не достигнут конец файла
+    while (!input.eof()) {
+        int x, y, s;
+        input >> x; // читаем x координату
+        input >> y; // читаем y координату
+        input >> s; // читаем номер множества
+        // добавляем в динамический массив точку на основе прочитанных данных
+        points.emplace_back(Point(sf::Vector2<int>(x, y), s));
+    }
+    // закрываем файл
+    input.close();
+}
 
 // рисование параметров цвета
 void ShowBackgroundSetting() {
@@ -152,7 +190,9 @@ void ShowAddElem() {
 
 // панель добавления случайных точек
 void ShowRandomize() {
+    // если не раскрыта панель `Randomize`
     if (!ImGui::CollapsingHeader("Randomize"))
+        // заканчиваем выполнение
         return;
 
     // первый элемент в строке
@@ -162,7 +202,7 @@ void ShowRandomize() {
     if (ImGui::DragInt("Count", lastRandoCntBuf, 0.1, 0, 100)) {
 
     }
-    // восстанавливаем буффер id
+    // восстанавливаем буфер id
     ImGui::PopID();
     // следующий элемент будет на той же строчке
     ImGui::SameLine();
@@ -173,6 +213,38 @@ void ShowRandomize() {
         // по клику добавляем заданное число случайных точек
         randomize(lastRandoCntBuf[0]);
     ImGui::PopID();
+}
+
+
+// работа с файлами
+void ShowFiles() {
+    // если не раскрыта панель `Files`
+    if (!ImGui::CollapsingHeader("Files"))
+        // заканчиваем выполнение
+        return;
+
+    // первый элемент в линии
+    ImGui::PushID(0);
+    // создаём кнопку загрузки
+    if (ImGui::Button("Load")) {
+        // загружаем данные из файла
+        loadFromFile();
+    }
+    // восстанавливаем буфер id
+    ImGui::PopID();
+
+    // следующий элемент будет на той же строчке
+    ImGui::SameLine();
+    // второй элемент
+    ImGui::PushID(1);
+    // создаём кнопку сохранения
+    if (ImGui::Button("Save")) {
+        // сохраняем задачу в файл
+        saveToFile();
+    }
+    // восстанавливаем буфер id
+    ImGui::PopID();
+
 }
 
 
@@ -238,6 +310,8 @@ int main() {
         ShowAddElem();
         // добавление случайных точек
         ShowRandomize();
+        // работа с файлами
+        ShowFiles();
 
         // конец рисования окна
         ImGui::End();
