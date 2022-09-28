@@ -307,6 +307,32 @@ void ShowSolve() {
     ImGui::PopID();
 }
 
+// помощь
+void ShowHelp() {
+    if (!ImGui::CollapsingHeader("Help"))
+        return;
+
+    // первый заголовок
+    ImGui::Text("ABOUT THIS DEMO:");
+    // первый элемент списка
+    ImGui::BulletText("Author Ivanov Ivan 10-1");
+    // второй элемент списка
+    ImGui::BulletText("Powered by SFML+ImGui");
+    // разделитель
+    ImGui::Separator();
+
+    // второй заголовок
+    ImGui::Text("TASK:");
+    // первый элемент списка(многострочный)
+    ImGui::BulletText("Two sets of points are given\n"
+                      "in an integer two-dimensional space.\n"
+                      "It is required to build intersections and\n"
+                      "the difference between these sets.");
+    // разделитель
+    ImGui::Separator();
+
+}
+
 
 // главный метод
 int main() {
@@ -374,6 +400,8 @@ int main() {
         ShowFiles();
         // решение задачи
         ShowSolve();
+        // помощь
+        ShowHelp();
 
         // конец рисования окна
         ImGui::End();
