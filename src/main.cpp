@@ -118,6 +118,17 @@ int main() {
                 // закрываем окно
                 window.close();
             }
+            // если событие - это клик мышью
+            if (event.type == sf::Event::MouseButtonPressed) {
+                // если мышь не обрабатывается элементами imGui
+                if (!ImGui::GetIO().WantCaptureMouse) {
+                    // если левая кнопка мыши
+                    if (event.mouseButton.button == sf::Mouse::Button::Left)
+                        points.emplace_back(sf::Vector2<int>(event.mouseButton.x, event.mouseButton.y), SET_1);
+                    else
+                        points.emplace_back(sf::Vector2<int>(event.mouseButton.x, event.mouseButton.y), SET_2);
+                }
+            }
         }
 
         // запускаем обновление окна по таймеру с заданной частотой
